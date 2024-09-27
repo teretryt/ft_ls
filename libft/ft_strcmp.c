@@ -1,44 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strrchr.c                                       :+:      :+:    :+:   */
+/*   ft_strcmp.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tcelik <tcelik@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/10/08 15:08:40 by tcelik            #+#    #+#             */
-/*   Updated: 2022/10/11 13:58:58 by tcelik           ###   ########.fr       */
+/*   Created: 2022/10/08 15:05:20 by tcelik            #+#    #+#             */
+/*   Updated: 2022/10/11 13:59:34 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strrchr(const char *s, int c)
+int	ft_strcmp(const char *s1, const char *s2)
 {
-	size_t	i;
-	int		x;
+	int i;
 
 	i = 0;
-	x = 0;
-	while (s[i])
+	while (s1[i] == s2[i] && s1[i] != '\0' && s2[i] != '\0')
 		i++;
-	while (x == 0)
-	{
-		if (s[i] == (char) c)
-			return ((char *)&s[i]);
-		if (i == 0)
-			x = 1;
-		i--;
-	}
-	return (NULL);
+	return (s1[i] - s2[i]);
 }
-/*
-#include <stdio.h>
-#include <string.h>
-int main()
-{
-    char test = 'a';
-    const char metin[] = "sadflkjsflhjbsdajln";
-    printf("orj:%s\n", strrchr(metin,(int)test));
-    printf("rep:%s\n", ft_strrchr(metin,(int)test));
-}
-*/
