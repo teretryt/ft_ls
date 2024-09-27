@@ -8,12 +8,10 @@
 # include <termios.h>
 # include <time.h>
 # include <errno.h>
-# include <string.h>
+# include <stdio.h>
 # include "../libft/libft.h"
 
-// Dosya tipini belirleyen makro tanımı
-
-enum F_TYPES {
+enum e_type {
 	FT_FILE,
 	FT_DIR,
 	FT_LINK,
@@ -23,31 +21,6 @@ enum F_TYPES {
 	FT_SOCK,
 	FT_UNKNOWN
 };
-
-# define TRUE 1
-# define FALSE 0
-# define RETURN_TYPE(st) ({						\
-	enum F_TYPES answer;						\
-	if ((st.st_mode & S_IFMT) == S_IFREG)		\
-		answer = FT_FILE;						\
-	else if ((st.st_mode & S_IFMT) == S_IFDIR)	\
-		answer = FT_DIR;						\
-	else if ((st.st_mode & S_IFMT) == S_IFLNK)	\
-		answer = FT_LINK;						\
-	else if ((st.st_mode & S_IFMT) == S_IFCHR)	\
-		answer = FT_CHR;						\
-	else if ((st.st_mode & S_IFMT) == S_IFBLK)	\
-		answer = FT_BLK;						\
-	else if ((st.st_mode & S_IFMT) == S_IFIFO)	\
-		answer = FT_FIFO;						\
-	else if ((st.st_mode & S_IFMT) == S_IFSOCK)	\
-		answer = FT_SOCK;						\
-	else {										\
-		answer  = FT_UNKNOWN;					\
-	}											\
-	answer;										\
-})
-
 
 typedef struct s_file {
 	unsigned short	_type;
@@ -62,5 +35,6 @@ typedef struct s_file {
 } t_file;
 
 unsigned char	check_args(int argc, char **argv);
-
+t_file			**collect_data(int ac, char **av, unsigned char flags);
+void			free_double_pointer(char ***str);
 #endif
