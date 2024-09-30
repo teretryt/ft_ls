@@ -43,22 +43,6 @@ unsigned char	check_args(int argc, char **argv)
 	return (flags);
 }
 
-void	stringSort(char **arr, int n)
-{
-	char temp[4096];
-
-	for (int i = 0; i < n - 1; i++) {
-		for (int j = i + 1; j < n; j++) {
-			// strcmp kullanarak stringleri karşılaştırıyoruz
-			if (ft_strcmp(arr[i], arr[j]) > 0) {
-				ft_strlcpy(temp, arr[i], 4096);
-				ft_strlcpy(arr[i], arr[j], 4096);
-				ft_strlcpy(arr[j], temp, 4096);
-			}
-		}
-	}
-}
-
 char **path_parser(int ac, char **av)
 {
 	char **paths;
@@ -70,12 +54,8 @@ char **path_parser(int ac, char **av)
 		i++;
 	paths = malloc(sizeof(char *) * (ac - i + 1));
 	j = -1;
-	while (++j < ac - i){
-		write(1, "Toplanacak pathler sıralanıyor...\n", 34);
-		ft_putnbr_fd(ac - i, 1);
-		ft_putchar_fd('\n', 1);
+	while (++j < ac - i)
 		paths[j] = ft_strdup(av[i + j]);
-	}
 	paths[j] = NULL;
 	stringSort(paths, ac - i);
 	return (paths);

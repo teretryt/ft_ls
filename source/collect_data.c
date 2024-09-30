@@ -24,6 +24,7 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 	t_file			*tmp;
 	DIR				*dir;
 	struct dirent	*entry;
+	char new_path[4096];
 	
 	(void) flags;
 	dir = opendir(path);
@@ -35,6 +36,11 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 	while ((entry = readdir(dir)) != NULL) {
 		if ((flags & 0x01) == 0 && ft_strncmp(entry->d_name, ".", 1) == 0)
 			continue;
+		ft_strlcpy(new_path, path, sizeof(new_path));
+		ft_strlcat(new_path, "/", sizeof(new_path));
+		ft_strlcat(new_path, entry->d_name, sizeof(new_path));
+/* 		ft_putstr_fd("New PATH: ", 1);
+		ft_putstr_fd(new_path, 1); */
 		if (files == NULL)
 		{
 			files = ft_file_new();
@@ -42,6 +48,8 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 				return ;
 			files->_info = (struct dirent *) malloc(sizeof(struct dirent));
 			files->_info = ft_memcpy(files->_info, entry, sizeof(struct dirent));
+			files->_stat = (struct stat *) malloc(sizeof(struct stat));
+			lstat(new_path, files->_stat);
 			if (parent_file){
 				parent_file->_child = files;
 				files->_parent_dir = parent_file;
@@ -54,19 +62,17 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 				return ;
 			tmp->_info = malloc(sizeof(struct dirent));
 			tmp->_info = ft_memcpy(tmp->_info, entry, sizeof(struct dirent));
+			tmp->_stat = (struct stat *) malloc(sizeof(struct stat));
+			lstat(new_path, tmp->_stat);
 			tmp->_prev = files;
 			files->_next = tmp;
 			files = tmp;
 			if (parent_file)
 				files->_parent_dir = parent_file;
 		}
-		if ((flags & 0x02) == 0x02 && entry->d_type == DT_DIR) {
-			char new_path[4096];
-			ft_strlcpy(new_path, path, sizeof(new_path));
-			ft_strlcat(new_path, "/", sizeof(new_path));
-			ft_strlcat(new_path, entry->d_name, sizeof(new_path));
-			/*printf("Dizin: %s\n", new_path);*/
-			collect(NULL, new_path, files, flags);
+		if (HAS_FLAG(flags, FLAG_R) && entry->d_type == DT_DIR) {
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+				collect(NULL, new_path, files, flags);
 		} 
 		if (entry->d_type == DT_REG)
 		{
@@ -92,7 +98,7 @@ t_list	*collect_data(int ac, char **av, char **paths, unsigned char flags)
 	{
 		p_list = ft_lstnew((void *) malloc(sizeof(t_file)));
 		collect((t_file **) (&(p_list->content)), ".", NULL, flags);
-		ft_putstr_fd("Toplanacak path yok, mevcut dizin toplanıyor...\n", 1);
+		ft_strlcat(p_list->root, ".", 4096);
 		return (p_list);
 	}
 	j = 0;
@@ -103,9 +109,8 @@ t_list	*collect_data(int ac, char **av, char **paths, unsigned char flags)
 			p_list = ft_lstnew((void *) malloc(sizeof(t_file)));
 			head = p_list;
 		}
-		ft_putstr_fd("Toplanacak path:", 1);
-		ft_putstr_fd(paths[j],1);ft_putchar_fd('\n', 1);
 		collect((t_file **) (&(p_list->content)), paths[j], NULL, flags);
+		ft_strlcat(p_list->root, paths[j], 4096);
 		if (++j != ac - i)
 		{
 			ft_lstadd_back(&p_list, ft_lstnew((void *) malloc(sizeof(t_file))));

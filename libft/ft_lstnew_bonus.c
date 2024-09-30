@@ -20,6 +20,7 @@ t_list	*ft_lstnew(void *content)
 	if (!nodes)
 		return (NULL);
 	nodes -> content = content;
+	nodes -> root[0] = '\0';
 	nodes -> next = NULL;
 	return (nodes);
 }

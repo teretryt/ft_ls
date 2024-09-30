@@ -26,6 +26,7 @@
 typedef struct s_list
 {
 	void			*content;
+	char			root[4096];
 	struct s_list	*next;
 }				t_list;
 
