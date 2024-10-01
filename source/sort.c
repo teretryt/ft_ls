@@ -55,7 +55,7 @@ t_file *sort_files_time(t_file *head)
 
         while (ptr1->_next != lptr)
         {
-            if (ptr1->_stat->st_mtime < ptr1->_next->_stat->st_mtime)
+            if (ptr1->_stat->st_mtimespec.tv_nsec < ptr1->_next->_stat->st_mtimespec.tv_nsec)
             {
                 swap(&head, ptr1, ptr1->_next);
                 swapped = 1;
@@ -100,17 +100,61 @@ t_file *sort_files_alph(t_file *head)
     return head;
 }
 
-void	stringSort(char **arr, int n)
+void    string_sort_time(char **arr, int n, uint8_t reverse)
 {
-	char temp[4096];
+    int i;
+    int j;
+    struct stat stat1;
+    struct stat stat2;
+    char temp[PATH_MAX];
 
-	for (int i = 0; i < n - 1; i++) {
-		for (int j = i + 1; j < n; j++) {
-			// strcmp kullanarak stringleri karşılaştırıyoruz
-			if (ft_strcmp(arr[i], arr[j]) > 0) {
-				ft_strlcpy(temp, arr[i], 4096);
-				ft_strlcpy(arr[i], arr[j], 4096);
-				ft_strlcpy(arr[j], temp, 4096);
+    i = -1;
+    while (++i < n - 1)
+    {
+        j = i;
+        while (++j < n)
+        {
+            lstat(arr[i], &stat1);
+            lstat(arr[j], &stat2);
+            if (reverse && stat1.st_mtime > stat2.st_mtime)
+            {
+                ft_strlcpy(temp, arr[i], PATH_MAX);
+                ft_strlcpy(arr[i], arr[j], PATH_MAX);
+                ft_strlcpy(arr[j], temp, PATH_MAX);
+            }
+            if (!reverse && stat1.st_mtime < stat2.st_mtime)
+            {
+                ft_strlcpy(temp, arr[i], PATH_MAX);
+                ft_strlcpy(arr[i], arr[j], PATH_MAX);
+                ft_strlcpy(arr[j], temp, PATH_MAX);
+            }
+        }
+    }
+}
+
+void	stringSort(char **arr, int n, uint8_t reverse)
+{
+    int     i;
+    int     j;
+	char    temp[PATH_MAX];
+
+    i = -1;
+    while (++i < n - 1)
+    {
+        j = i;
+        while (++j < n)
+        {
+            if (reverse && ft_strcmp(arr[i], arr[j]) > 0)
+            {
+				ft_strlcpy(temp, arr[i], PATH_MAX);
+				ft_strlcpy(arr[i], arr[j], PATH_MAX);
+				ft_strlcpy(arr[j], temp, PATH_MAX);
+			}
+			if (!reverse && ft_strcmp(arr[i], arr[j]) < 0)
+            {
+				ft_strlcpy(temp, arr[i], PATH_MAX);
+				ft_strlcpy(arr[i], arr[j], PATH_MAX);
+				ft_strlcpy(arr[j], temp, PATH_MAX);
 			}
 		}
 	}

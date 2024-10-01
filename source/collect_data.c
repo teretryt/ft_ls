@@ -16,25 +16,19 @@ Example directory structure:
 	- file6.txt
 */
 
-
-
-static void	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags)
+static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags)
 {
 	t_file			*files;
 	t_file			*tmp;
 	DIR				*dir;
 	struct dirent	*entry;
-	char new_path[4096];
+	char new_path[PATH_MAX];
 	
 	(void) flags;
 	dir = opendir(path);
-	if (dir == NULL) {
-		printf("ft_ls: %s\n", strerror(errno));
-		return;
-	}
 	files = NULL;
 	while ((entry = readdir(dir)) != NULL) {
-		if ((flags & 0x01) == 0 && ft_strncmp(entry->d_name, ".", 1) == 0)
+		if (!HAS_FLAG(flags, FLAG_A) && ft_strncmp(entry->d_name, ".", 1) == 0)
 			continue;
 		ft_strlcpy(new_path, path, sizeof(new_path));
 		ft_strlcat(new_path, "/", sizeof(new_path));
@@ -45,7 +39,7 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 		{
 			files = ft_file_new();
 			if (!files)
-				return ;
+				return (1);
 			files->_info = (struct dirent *) malloc(sizeof(struct dirent));
 			files->_info = ft_memcpy(files->_info, entry, sizeof(struct dirent));
 			files->_stat = (struct stat *) malloc(sizeof(struct stat));
@@ -59,7 +53,7 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 		{
 			tmp = ft_file_new();
 			if (!tmp)
-				return ;
+				return (1);
 			tmp->_info = malloc(sizeof(struct dirent));
 			tmp->_info = ft_memcpy(tmp->_info, entry, sizeof(struct dirent));
 			tmp->_stat = (struct stat *) malloc(sizeof(struct stat));
@@ -71,8 +65,10 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 				files->_parent_dir = parent_file;
 		}
 		if (HAS_FLAG(flags, FLAG_R) && entry->d_type == DT_DIR) {
-			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0){
+				ft_putstr_fd("Recursing into: ", 1);
 				collect(NULL, new_path, files, flags);
+			}
 		} 
 		if (entry->d_type == DT_REG)
 		{
@@ -82,39 +78,35 @@ static void	collect(t_file **_files, const char *path, t_file *parent_file, unsi
 	if (parent_file == NULL)
 		*_files = files;
 	closedir(dir);
+	return (0);
 }
 
-t_list	*collect_data(int ac, char **av, char **paths, unsigned char flags)
+t_list	*collect_data(char **paths, unsigned char flags)
 {
-	int		i;
 	int		j;
+	uint8_t	ret;
 	t_list	*p_list;
 	t_list 	*head;
 
-	i = 1;
-	while (av[i] && av[i][0] && av[i][0] == '-')
-		i++;
-	if (i == ac)
-	{
-		p_list = ft_lstnew((void *) malloc(sizeof(t_file)));
-		collect((t_file **) (&(p_list->content)), ".", NULL, flags);
-		ft_strlcat(p_list->root, ".", 4096);
-		return (p_list);
-	}
-	j = 0;
-	while(j < ac - i)
+	j = -1;
+	if (!paths)
+		return (NULL);
+	while(paths[++j])
 	{
 		if (j == 0)
 		{
 			p_list = ft_lstnew((void *) malloc(sizeof(t_file)));
 			head = p_list;
 		}
-		collect((t_file **) (&(p_list->content)), paths[j], NULL, flags);
-		ft_strlcat(p_list->root, paths[j], 4096);
-		if (++j != ac - i)
+		ret = collect((t_file **) (&(p_list->content)), paths[j], NULL, flags);
+		if (ret == 0)
 		{
-			ft_lstadd_back(&p_list, ft_lstnew((void *) malloc(sizeof(t_file))));
-			p_list = p_list->next;
+			ft_strlcat(p_list->root, paths[j], PATH_MAX);
+			if (j + 1 != (int) arr_len((const char **)paths))
+			{
+				ft_lstadd_back(&p_list, ft_lstnew((void *) malloc(sizeof(t_file))));
+				p_list = p_list->next;
+			}
 		}
 	}
 	return (head);

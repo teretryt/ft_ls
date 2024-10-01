@@ -41,14 +41,14 @@ static void	print_parent_path(t_file *file, char *root)
 	free_double_pointer(&arr);
 }
 
-void    write_paths(t_list *path_list, char **paths, unsigned char flags)
+void    write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags)
 {
 	size_t i;
 
 	i = 0;
 	while (path_list)
 	{
-		if (arr_len((const char **)paths) > 1){
+		if (dir_count > 1){
 			ft_putstr_fd(paths[i++], 1);
 			ft_putstr_fd(":\n", 1);
 		}
@@ -67,9 +67,12 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 	size_t	i;
 	size_t	max_len;
 
-	files = sort_files_alph(files);
+	if (!files)
+		return ;
 	if (HAS_FLAG(flags, FLAG_T))
 		files = sort_files_time(files);
+	else
+		files = sort_files_alph(files);
 	if (HAS_FLAG(flags, FLAG_RR))
 		files = sort_files_reverse(files);
 	tmp = files;
@@ -91,7 +94,7 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 	}
 	ft_putchar_fd('\n', 1);
 	while (HAS_FLAG(flags, FLAG_R) && files){
-		if (files->_info->d_type == DT_DIR){
+		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0){
 			ft_putchar_fd('\n', 1);
 			if (files->_child)
 				write_files(files->_child, root, flags);
@@ -100,4 +103,11 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 		}
 		files = files->_next;
 	}
+}
+
+void	print_err(char *error)
+{
+	ft_putstr_fd("ft_ls: ", 2);
+	ft_putstr_fd(error, 2);
+	ft_putstr_fd("\n" , 2);
 }

@@ -18,6 +18,8 @@ t_file    *ft_file_new(void)
 
 t_file  *get_head_file(t_file *file)
 {
+    if (!file)
+        return (NULL);
     while (file->_parent_dir != NULL || file->_prev != NULL)
     {
         if (file->_parent_dir != NULL)
@@ -47,3 +49,22 @@ void	ft_file_clear(t_file **lst)
 	}
 	*lst = NULL;
 }
+
+/* char    **sep_arr(char ***stack, char *needle)
+{
+    size_t  i;
+    size_t  len;
+    char    **ret;
+
+    i = -1;
+    if (!stack || !needle)
+        return NULL;
+    len = arr_len((const char **)(*stack));
+    ret = (char **)malloc(sizeof(char *) * (len + 1));
+    if (!ret)
+        return NULL;
+    while(++i < len)
+        ret[i] = ft_strdup(*stack[i]);
+    ret[i] = NULL;
+    return (ret);
+} */
