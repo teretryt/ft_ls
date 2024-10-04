@@ -184,17 +184,22 @@ size_t	*get_max_values(t_file *files)
 	size_t			*r;
 
 	r = (size_t *)malloc(sizeof(size_t) * 5);
+	if (!files || !r)
+		return NULL;
 	r[0] = 0;
 	r[1] = 0;
 	r[2] = 0;
 	r[3] = 0;
 	r[4] = 0;
-	if (!files)
-		return NULL;
 	while (files)
 	{
 		_group = getgrgid(files->_stat->st_gid);
 		pw = getpwuid(files->_stat->st_uid);
+		if (!pw || !_group)
+		{
+			ft_putstr_fd("Permission denied.\n", 2);
+			return NULL;
+		}
 		if (files->_stat->st_nlink > (int)r[0])
 			r[0] = files->_stat->st_nlink;
 		if (ft_strlen(pw->pw_name) > (int) r[1])
@@ -221,7 +226,7 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 		files = sort_files_time(files);
 	else
 		files = sort_files_alph(files);
-	if (HAS_FLAG(flags, FLAG_R))
+	if (HAS_FLAG(flags, FLAG_RR))
 		files = sort_files_reverse(files);
 	tmp = files;
 	i = 0;
@@ -254,6 +259,16 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 	}
 	if (max_lens)
 		free(max_lens);
+	while (HAS_FLAG(flags, FLAG_R) && files){
+		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0){
+			ft_putchar_fd('\n', 1);
+			if (files->_child)
+				write_files_l(files->_child, root, flags);
+			else
+				print_parent_path(files, root);
+		}
+		files = files->_next;
+	}
 }
 
 void	write_files(t_file *files, char *root, unsigned char flags)

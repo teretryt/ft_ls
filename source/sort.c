@@ -55,10 +55,20 @@ t_file *sort_files_time(t_file *head)
 
         while (ptr1->_next != lptr)
         {
-            if (ptr1->_stat->st_mtimespec.tv_nsec < ptr1->_next->_stat->st_mtimespec.tv_nsec)
+            if (ptr1->_stat->st_mtimespec.tv_sec < ptr1->_next->_stat->st_mtimespec.tv_sec)
             {
                 swap(&head, ptr1, ptr1->_next);
                 swapped = 1;
+            }
+            else if (ptr1->_stat->st_mtimespec.tv_sec == ptr1->_next->_stat->st_mtimespec.tv_sec)
+            {
+                if (ptr1->_stat->st_mtimespec.tv_nsec < ptr1->_next->_stat->st_mtimespec.tv_nsec)
+                {
+                    swap(&head, ptr1, ptr1->_next);
+                    swapped = 1;
+                }
+                else
+                    ptr1 = ptr1->_next;
             }
             else
                 ptr1 = ptr1->_next;
@@ -116,17 +126,22 @@ void    string_sort_time(char **arr, int n, uint8_t reverse)
         {
             lstat(arr[i], &stat1);
             lstat(arr[j], &stat2);
-            if (reverse && stat1.st_mtime > stat2.st_mtime)
+            if ((!reverse && stat1.st_mtimespec.tv_sec < stat2.st_mtimespec.tv_sec) \
+                || (reverse && stat1.st_mtimespec.tv_sec > stat2.st_mtimespec.tv_sec))
             {
                 ft_strlcpy(temp, arr[i], PATH_MAX);
                 ft_strlcpy(arr[i], arr[j], PATH_MAX);
                 ft_strlcpy(arr[j], temp, PATH_MAX);
             }
-            if (!reverse && stat1.st_mtime < stat2.st_mtime)
+            else if (stat1.st_mtimespec.tv_sec == stat2.st_mtimespec.tv_sec)
             {
-                ft_strlcpy(temp, arr[i], PATH_MAX);
-                ft_strlcpy(arr[i], arr[j], PATH_MAX);
-                ft_strlcpy(arr[j], temp, PATH_MAX);
+                if ((!reverse && stat1.st_mtimespec.tv_nsec < stat2.st_mtimespec.tv_nsec) \
+                    || (reverse && stat1.st_mtimespec.tv_nsec > stat2.st_mtimespec.tv_nsec))
+                {
+                    ft_strlcpy(temp, arr[i], PATH_MAX);
+                    ft_strlcpy(arr[i], arr[j], PATH_MAX);
+                    ft_strlcpy(arr[j], temp, PATH_MAX);
+                }
             }
         }
     }
@@ -144,13 +159,13 @@ void	stringSort(char **arr, int n, uint8_t reverse)
         j = i;
         while (++j < n)
         {
-            if (reverse && ft_strcmp(arr[i], arr[j]) > 0)
+            if (reverse && ft_strcmp(arr[i], arr[j]) < 0)
             {
 				ft_strlcpy(temp, arr[i], PATH_MAX);
 				ft_strlcpy(arr[i], arr[j], PATH_MAX);
 				ft_strlcpy(arr[j], temp, PATH_MAX);
 			}
-			if (!reverse && ft_strcmp(arr[i], arr[j]) < 0)
+			if (!reverse && ft_strcmp(arr[i], arr[j]) > 0)
             {
 				ft_strlcpy(temp, arr[i], PATH_MAX);
 				ft_strlcpy(arr[i], arr[j], PATH_MAX);

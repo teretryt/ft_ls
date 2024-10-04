@@ -51,6 +51,7 @@ int	main(int ac, char **av)
 		tmp = tmp->next;
 	}
 	ft_putstr_fd("Roots END------------------:\n", 1); */
+	
 	write_paths(collected_data, paths, _dir_count, flags);
 
 	free_double_pointer(&paths);
