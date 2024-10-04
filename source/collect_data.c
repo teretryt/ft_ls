@@ -64,6 +64,7 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 			if (parent_file)
 				files->_parent_dir = parent_file;
 		}
+		
 		if (HAS_FLAG(flags, FLAG_R) && entry->d_type == DT_DIR) {
 			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0){
 				ft_putstr_fd("Recursing into: ", 1);

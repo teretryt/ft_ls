@@ -1,5 +1,118 @@
 #include "../includes/ft_ls.h"
 
+static void write_total(size_t total)
+{
+	ft_putstr_fd("total ", 1);
+	ft_putnbr_fd((int) total, 1);
+	ft_putchar_fd('\n', 1);
+}
+
+static void write_size(off_t size, int max_len)
+{
+	int		tmp;
+	int		max;
+
+	tmp = size;
+	max = 0;
+	while (max_len)
+	{
+		max_len /= 10;
+		max++;
+	}
+	if (size == 0)
+		tmp = 1;
+	while (tmp)
+	{
+		tmp /= 10;
+		max--;
+	}
+	while (max--)
+		ft_putchar_fd(' ', 1);
+	ft_putnbr_fd(size, 1);
+	ft_putchar_fd(' ', 1);
+}
+
+static void	write_owner(uid_t st_uid, size_t max_len)
+{
+	struct passwd* pw;
+
+	pw = getpwuid(st_uid);
+	ft_putstr_fd(pw->pw_name, 1);
+	max_len = max_len - ft_strlen(pw->pw_name);
+	while (max_len-- > 0)
+		ft_putchar_fd(' ', 1);
+	ft_putstr_fd("  ", 1);
+}
+
+static void	write_group(gid_t st_gid, size_t max_len)
+{
+	struct group* gr;
+
+	gr = getgrgid(st_gid);
+	ft_putstr_fd(gr->gr_name, 1);
+	max_len = max_len - ft_strlen(gr->gr_name);
+	while (max_len-- > 0)
+		ft_putchar_fd(' ', 1);
+	ft_putstr_fd("  ", 1);
+}
+
+static void write_link_count(nlink_t n, size_t max)
+{
+	uint16_t	tmp;
+	uint8_t		max_len;
+
+	tmp = n;
+	max_len = 0;
+	while (max)
+	{
+		max /= 10;
+		max_len++;
+	}
+	while (tmp)
+	{
+		tmp /= 10;
+		max_len--;
+	}
+	while (max_len--)
+		ft_putchar_fd(' ', 1);
+	ft_putnbr_fd(n, 1);
+	ft_putchar_fd(' ', 1);
+}
+
+static void write_file_type(mode_t m)
+{
+	if (S_ISREG(m))
+		ft_putchar_fd('-', 1);
+	else if (S_ISDIR(m))
+		ft_putchar_fd('d', 1);
+	else if (S_ISLNK(m))
+		ft_putchar_fd('l', 1);
+	else if (S_ISCHR(m))
+		ft_putchar_fd('c', 1);
+	else if (S_ISBLK(m))
+		ft_putchar_fd('b', 1);
+	else if (S_ISFIFO(m))
+		ft_putchar_fd('p', 1);
+	else if (S_ISSOCK(m))
+		ft_putchar_fd('s', 1);
+	else
+		ft_putchar_fd('?', 1);
+}
+
+static void output_permissions(mode_t m)
+{
+    OW_RD(m);
+    OW_WR(m);
+    OW_EX(m);
+    GR_RD(m);
+    GR_WR(m);
+    GR_EX(m);
+    OTH_RD(m);
+    OTH_WR(m);
+    OTH_EX(m);
+	ft_putstr_fd("  ", 1);
+}
+
 static void	print_path_title(size_t j, char **arr, char *root)
 {
 	/* if (flag == 1)
@@ -54,11 +167,93 @@ void    write_paths(t_list *path_list, char **paths, int dir_count, unsigned cha
 		}
 		/* ft_putstr_fd(path_list->root, 1); */
 		/* ft_putstr_fd("\n", 1); */
-		write_files(get_head_file(path_list->content), path_list->root, flags);
+		if (HAS_FLAG(flags, FLAG_L))
+			write_files_l(get_head_file(path_list->content), path_list->root, flags);
+		else
+			write_files(get_head_file(path_list->content), path_list->root, flags);
 		if (path_list->next && arr_len((const char **)paths) > 1)
 			ft_putchar_fd('\n', 1);
 		path_list = path_list->next;
 	}
+}
+
+size_t	*get_max_values(t_file *files)
+{
+	struct group	*_group;
+	struct passwd	*pw;
+	size_t			*r;
+
+	r = (size_t *)malloc(sizeof(size_t) * 5);
+	r[0] = 0;
+	r[1] = 0;
+	r[2] = 0;
+	r[3] = 0;
+	r[4] = 0;
+	if (!files)
+		return NULL;
+	while (files)
+	{
+		_group = getgrgid(files->_stat->st_gid);
+		pw = getpwuid(files->_stat->st_uid);
+		if (files->_stat->st_nlink > (int)r[0])
+			r[0] = files->_stat->st_nlink;
+		if (ft_strlen(pw->pw_name) > (int) r[1])
+			r[1] = ft_strlen(pw->pw_name);
+		if (ft_strlen(_group->gr_name) > (int) r[2])
+			r[2] = ft_strlen(_group->gr_name);
+		if (files->_stat->st_size > (int) r[3])
+			r[3] = files->_stat->st_size;
+		r[4] += (size_t) files->_stat->st_blocks; 
+		files = files->_next;
+	}
+	return (r);
+}
+
+void	write_files_l(t_file *files, char *root, unsigned char flags)
+{
+	t_file	*tmp;
+	size_t	i;
+	size_t	max_len;
+
+	if (!files)
+		return ;
+	if (HAS_FLAG(flags, FLAG_T))
+		files = sort_files_time(files);
+	else
+		files = sort_files_alph(files);
+	if (HAS_FLAG(flags, FLAG_R))
+		files = sort_files_reverse(files);
+	tmp = files;
+	i = 0;
+	max_len = find_max_lenght(files);
+	if (HAS_FLAG(flags, FLAG_R) && tmp->_parent_dir != NULL)
+		print_parent_path(tmp->_parent_dir, root);
+	size_t *max_lens = get_max_values(tmp);
+	if (!max_lens)
+		exit(1);
+	write_total(max_lens[4]);
+	while (tmp)
+	{
+		write_file_type(tmp->_stat->st_mode);
+		output_permissions(tmp->_stat->st_mode);
+		write_link_count(tmp->_stat->st_nlink, max_lens[0]);
+		write_owner(tmp->_stat->st_uid, max_lens[1]);
+		write_group(tmp->_stat->st_gid, max_lens[2]);
+		write_size(tmp->_stat->st_size, max_lens[3]);
+		char *time = ft_substr(ctime(&(tmp->_stat->st_mtime)), 4, 12);
+		ft_putstr_fd(time, 1);
+		free(time);
+		ft_putstr_fd(" ", 1);
+		ft_putstr_fd(tmp->_info->d_name, 1);
+	
+		i = ft_strlen(tmp->_info->d_name);
+		while (i++ < max_len)
+			ft_putchar_fd(' ', 1);
+		ft_putchar_fd('\n', 1);
+		tmp = tmp->_next;
+	}
+	if (max_lens)
+		free(max_lens);
 }
 
 void	write_files(t_file *files, char *root, unsigned char flags)

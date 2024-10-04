@@ -6,6 +6,8 @@
 # include <sys/xattr.h>
 # include <dirent.h>
 # include <termios.h>
+# include <grp.h>
+# include <pwd.h>
 # include <time.h>
 # include <errno.h>
 # include <stdio.h>
@@ -17,6 +19,21 @@
 # define FLAG_T 0x08
 # define FLAG_RR 0x10
 # define HAS_FLAG(x, y) ((x) & (y))
+# define OW_RD(m) {if (m & S_IRUSR) write(1, "r", 1); else write(1, "-", 1);}
+# define OW_WR(m) {if (m & S_IWUSR) write(1, "w", 1); else write(1, "-", 1);}
+# define OEX_Q1(m) {if (m & S_IXUSR) write(1, "s", 1); else write(1, "S", 1);}
+# define OEX_Q2(m) {if (m & S_IXUSR) write(1, "x", 1); else write(1, "-", 1);}
+# define OW_EX(m) {if (m & S_ISUID) OEX_Q1(m) else OEX_Q2(m);}
+# define GR_RD(m) {if (m & S_IRGRP) write(1, "r", 1); else write(1, "-", 1);}
+# define GR_WR(m) {if (m & S_IWGRP) write(1, "w", 1); else write(1, "-", 1);}
+# define GEX_Q1(m) {if (m & S_IXGRP) write(1, "s", 1); else write(1, "S", 1);}
+# define GEX_Q2(m) {if (m & S_IXGRP) write(1, "x", 1); else write(1, "-", 1);}
+# define GR_EX(m) {if (m & S_ISGID) GEX_Q1(m) else GEX_Q2(m);}
+# define OTH_RD(m) {if (m & S_IROTH) write(1, "r", 1); else write(1, "-", 1);}
+# define OTH_WR(m) {if (m & S_IWOTH) write(1, "w", 1); else write(1, "-", 1);}
+# define OT_Q1(m) {if (m & S_IXOTH) write(1, "t", 1); else write(1, "T", 1);}
+# define OT_Q2(m) {if (m & S_IXOTH) write(1, "x", 1); else write(1, "-", 1);}
+# define OTH_EX(m) {if (m & S_ISVTX) OT_Q1(m) else OT_Q2(m);}
 
 
 enum e_type {
@@ -42,7 +59,6 @@ typedef struct s_file {
 	struct stat		*_stat;
 	unsigned int	_totalsize;
 	char			_name[256];
-	char			*_owner;
 	struct s_file	*_child;
 	struct s_file	*_parent_dir;
 	struct s_file	*_next;
@@ -58,6 +74,7 @@ void			stringSort(char **arr, int n, uint8_t reverse);
 void			string_sort_time(char **arr, int n, uint8_t reverse);
 void			ft_file_clear(t_file **lst);
 void			write_files(t_file *files, char *root, unsigned char flags);
+void	write_files_l(t_file *files, char*root, unsigned char flags);
 void			write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags);
 char			**path_parser(int ac, char **av, int *err, unsigned char flags);
 uint8_t			find_max_lenght(t_file *files);
