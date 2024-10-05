@@ -1,11 +1,12 @@
 #include "../includes/ft_ls.h"
-
+#include <stdio.h>
 
 t_file    *ft_file_new(void)
 {
     t_file	*nodes;
 
     nodes = (t_file *)malloc(sizeof(t_file));
+    printf("address file: %p\n", nodes);
     if (!nodes)
         return (NULL);
     nodes->_type = FT_UNKNOWN;

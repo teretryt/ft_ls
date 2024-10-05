@@ -30,17 +30,35 @@ static int	dir_count(int ac, char **av)
 
 int	main(int ac, char **av)
 {
+	printf("Hello, World!\n");
+	printf("%lu,", sizeof(t_list));
+	printf("%lu\n", sizeof(t_file));
+
 	unsigned char	flags;
 	char			**paths;
 	int				err;
 	int				_dir_count;
 	t_list			*collected_data;
 
+
+
 	err = 0;
 	flags = check_args(ac, &av[1]);
 	paths = path_parser(ac, av, &err, flags);
 	_dir_count = dir_count(ac, av);
 	collected_data = collect_data(paths, flags);
+	ft_putstr_fd("Roots----------------------:\n", 1);
+	t_list *tmp = collected_data;
+	while (tmp)
+	{
+		ft_putstr_fd(tmp->root, 1);
+		ft_putstr_fd("\n", 1);
+		tmp = tmp->next;
+	}
+	ft_clear_all(&collected_data);
+	free_double_pointer(&paths);
+	system("leaks ft_ls");
+	exit(1);
 	/* debug(flags);
 	ft_putstr_fd("Roots----------------------:\n", 1);
 	t_list *tmp = collected_data;
@@ -54,7 +72,6 @@ int	main(int ac, char **av)
 	
 	write_paths(collected_data, paths, _dir_count, flags);
 
-	free_double_pointer(&paths);
 	/* system("leaks ft_ls"); */
 	if (collected_data == NULL)
 		return err;

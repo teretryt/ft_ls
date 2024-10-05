@@ -68,13 +68,15 @@ typedef struct s_file {
 unsigned char	check_args(int argc, char **argv);
 t_list			*collect_data(char **paths, unsigned char flags);
 void			free_double_pointer(char ***str);
+void			ft_clear_all(t_list **collected_data);
+void			free_file(void **file);
 t_file			*ft_file_new(void);
 t_file			*get_head_file(t_file *file);
 void			stringSort(char **arr, int n, uint8_t reverse);
 void			string_sort_time(char **arr, int n, uint8_t reverse);
 void			ft_file_clear(t_file **lst);
 void			write_files(t_file *files, char *root, unsigned char flags);
-void	write_files_l(t_file *files, char*root, unsigned char flags);
+void			write_files_l(t_file *files, char*root, unsigned char flags);
 void			write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags);
 char			**path_parser(int ac, char **av, int *err, unsigned char flags);
 uint8_t			find_max_lenght(t_file *files);
@@ -85,6 +87,5 @@ t_file 			*sort_files_reverse(t_file *head);
 size_t			arr_len(const char **arr);
 void			print_err(char *error);
 void			print_errors(char **av, int i, int error_count);
-/* char			**sep_arr(char ***stack, char *needle); */
 size_t			get_err_count(char **av, int i);
 #endif

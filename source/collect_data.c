@@ -38,8 +38,10 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 		if (files == NULL)
 		{
 			files = ft_file_new();
-			if (!files)
+			if (!files){
+				closedir(dir);
 				return (1);
+			}
 			files->_info = (struct dirent *) malloc(sizeof(struct dirent));
 			files->_info = ft_memcpy(files->_info, entry, sizeof(struct dirent));
 			files->_stat = (struct stat *) malloc(sizeof(struct stat));
@@ -52,9 +54,11 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 		else
 		{
 			tmp = ft_file_new();
-			if (!tmp)
+			if (!tmp){
+				closedir(dir);
 				return (1);
-			tmp->_info = malloc(sizeof(struct dirent));
+			}
+			tmp->_info = (struct dirent *) malloc(sizeof(struct dirent));
 			tmp->_info = ft_memcpy(tmp->_info, entry, sizeof(struct dirent));
 			tmp->_stat = (struct stat *) malloc(sizeof(struct stat));
 			lstat(new_path, tmp->_stat);
@@ -89,8 +93,10 @@ t_list	*collect_data(char **paths, unsigned char flags)
 	{
 		if (j == 0)
 		{
-			p_list = ft_lstnew((void *) malloc(sizeof(t_file)));
-			head = p_list;
+			p_list = ft_lstnew(ft_file_new());
+            if (!p_list)
+                return (NULL);
+            head = p_list;
 		}
 		ret = collect((t_file **) (&(p_list->content)), paths[j], NULL, flags);
 		if (ret == 0)
@@ -98,7 +104,8 @@ t_list	*collect_data(char **paths, unsigned char flags)
 			ft_strlcat(p_list->root, paths[j], PATH_MAX);
 			if (j + 1 != (int) arr_len((const char **)paths))
 			{
-				ft_lstadd_back(&p_list, ft_lstnew((void *) malloc(sizeof(t_file))));
+				ft_lstadd_back(&p_list, ft_lstnew(ft_file_new()));
+				printf("p_list2: %p\n", p_list);
 				p_list = p_list->next;
 			}
 		}

@@ -116,10 +116,17 @@ char **path_parser(int ac, char **av, int *err, unsigned char flags)
 	if (ac - i == 0)
 	{
 		paths = (char **) malloc(sizeof(char *) * 2);
-		paths[0] = (char *) malloc(sizeof(char) * PATH_MAX);
-		ft_strlcat(paths[0], ".", PATH_MAX);
-		paths[1] = NULL;
-		return (paths);
+        if (!paths)
+            return (NULL);
+        paths[0] = (char *) malloc(sizeof(char) * PATH_MAX);
+        if (!paths[0])
+        {
+            free(paths);
+            return (NULL);
+        }
+        ft_strlcpy(paths[0], ".", PATH_MAX);
+        paths[1] = NULL;
+        return (paths);
 	}
 	if (ac - i - err_count == 0)
 		return (NULL);
