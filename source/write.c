@@ -1,16 +1,28 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   write.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/05 20:40:56 by tcelik            #+#    #+#             */
+/*   Updated: 2024/10/05 21:03:43 by tcelik           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/ft_ls.h"
 
-static void write_total(size_t total)
+static void	write_total(size_t total)
 {
 	ft_putstr_fd("total ", 1);
 	ft_putnbr_fd((int) total, 1);
 	ft_putchar_fd('\n', 1);
 }
 
-static void write_size(off_t size, int max_len)
+static void	write_size(off_t size, int max_len)
 {
-	int		tmp;
-	int		max;
+	int	tmp;
+	int	max;
 
 	tmp = size;
 	max = 0;
@@ -34,7 +46,7 @@ static void write_size(off_t size, int max_len)
 
 static void	write_owner(uid_t st_uid, size_t max_len)
 {
-	struct passwd* pw;
+	struct passwd	*pw;
 
 	pw = getpwuid(st_uid);
 	ft_putstr_fd(pw->pw_name, 1);
@@ -46,7 +58,7 @@ static void	write_owner(uid_t st_uid, size_t max_len)
 
 static void	write_group(gid_t st_gid, size_t max_len)
 {
-	struct group* gr;
+	struct group	*gr;
 
 	gr = getgrgid(st_gid);
 	ft_putstr_fd(gr->gr_name, 1);
@@ -56,7 +68,7 @@ static void	write_group(gid_t st_gid, size_t max_len)
 	ft_putstr_fd("  ", 1);
 }
 
-static void write_link_count(nlink_t n, size_t max)
+static void	write_link_count(nlink_t n, size_t max)
 {
 	uint16_t	tmp;
 	uint8_t		max_len;
@@ -79,7 +91,7 @@ static void write_link_count(nlink_t n, size_t max)
 	ft_putchar_fd(' ', 1);
 }
 
-static void write_file_type(mode_t m)
+static void	write_file_type(mode_t	m)
 {
 	if (S_ISREG(m))
 		ft_putchar_fd('-', 1);
@@ -99,24 +111,22 @@ static void write_file_type(mode_t m)
 		ft_putchar_fd('?', 1);
 }
 
-static void output_permissions(mode_t m)
+static void	output_permissions(mode_t m)
 {
-    OW_RD(m);
-    OW_WR(m);
-    OW_EX(m);
-    GR_RD(m);
-    GR_WR(m);
-    GR_EX(m);
-    OTH_RD(m);
-    OTH_WR(m);
-    OTH_EX(m);
+	ow_rd(m);
+	ow_wr(m);
+	ow_ex(m);
+	gr_rd(m);
+	gr_wr(m);
+	gr_ex(m);
+	oth_rd(m);
+	oth_wr(m);
+	oth_ex(m);
 	ft_putstr_fd("  ", 1);
 }
 
 static void	print_path_title(size_t j, char **arr, char *root)
 {
-	/* if (flag == 1)
-		ft_putstr_fd("\n", 1); */
 	ft_putstr_fd(root, 1);
 	ft_putstr_fd("/", 1);
 	while (j > 0)
@@ -130,10 +140,10 @@ static void	print_path_title(size_t j, char **arr, char *root)
 
 static void	print_parent_path(t_file *file, char *root)
 {
-	char    **arr;
+	char	**arr;
 	t_file	*tmp;
-	size_t  i;
-	size_t  j;
+	size_t	i;
+	size_t	j;
 
 	i = 0;
 	tmp = file;
@@ -142,7 +152,7 @@ static void	print_parent_path(t_file *file, char *root)
 		i++;
 		tmp = tmp->_parent_dir;
 	}
-	arr = (char**)malloc(sizeof(char*) * (i + 1));
+	arr = (char **) malloc(sizeof(char *) * (i + 1));
 	j = 0;
 	while (file)
 	{
@@ -154,20 +164,19 @@ static void	print_parent_path(t_file *file, char *root)
 	free_double_pointer(&arr);
 }
 
-void    write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags)
+void	write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (path_list)
 	{
-		if (dir_count > 1){
+		if (dir_count > 1)
+		{
 			ft_putstr_fd(paths[i++], 1);
 			ft_putstr_fd(":\n", 1);
 		}
-		/* ft_putstr_fd(path_list->root, 1); */
-		/* ft_putstr_fd("\n", 1); */
-		if (HAS_FLAG(flags, FLAG_L))
+		if (has_flag(flags, FLAG_L))
 			write_files_l(get_head_file(path_list->content), path_list->root, flags);
 		else
 			write_files(get_head_file(path_list->content), path_list->root, flags);
@@ -185,7 +194,7 @@ size_t	*get_max_values(t_file *files)
 
 	r = (size_t *)malloc(sizeof(size_t) * 5);
 	if (!files || !r)
-		return NULL;
+		return (NULL);
 	r[0] = 0;
 	r[1] = 0;
 	r[2] = 0;
@@ -198,7 +207,7 @@ size_t	*get_max_values(t_file *files)
 		if (!pw || !_group)
 		{
 			ft_putstr_fd("Permission denied.\n", 2);
-			return NULL;
+			return (NULL);
 		}
 		if (files->_stat->st_nlink > (int)r[0])
 			r[0] = files->_stat->st_nlink;
@@ -208,7 +217,7 @@ size_t	*get_max_values(t_file *files)
 			r[2] = ft_strlen(_group->gr_name);
 		if (files->_stat->st_size > (int) r[3])
 			r[3] = files->_stat->st_size;
-		r[4] += (size_t) files->_stat->st_blocks; 
+		r[4] += (size_t) files->_stat->st_blocks;
 		files = files->_next;
 	}
 	return (r);
@@ -219,21 +228,23 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 	t_file	*tmp;
 	size_t	i;
 	size_t	max_len;
+	size_t	*max_lens;
+	char	*time;
 
 	if (!files)
 		return ;
-	if (HAS_FLAG(flags, FLAG_T))
+	if (has_flag(flags, FLAG_T))
 		files = sort_files_time(files);
 	else
 		files = sort_files_alph(files);
-	if (HAS_FLAG(flags, FLAG_RR))
+	if (has_flag(flags, FLAG_RR))
 		files = sort_files_reverse(files);
 	tmp = files;
 	i = 0;
 	max_len = find_max_lenght(files);
-	if (HAS_FLAG(flags, FLAG_R) && tmp->_parent_dir != NULL)
+	if (has_flag(flags, FLAG_R) && tmp->_parent_dir != NULL)
 		print_parent_path(tmp->_parent_dir, root);
-	size_t *max_lens = get_max_values(tmp);
+	max_lens = get_max_values(tmp);
 	if (!max_lens)
 		exit(1);
 	write_total(max_lens[4]);
@@ -245,12 +256,11 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 		write_owner(tmp->_stat->st_uid, max_lens[1]);
 		write_group(tmp->_stat->st_gid, max_lens[2]);
 		write_size(tmp->_stat->st_size, max_lens[3]);
-		char *time = ft_substr(ctime(&(tmp->_stat->st_mtime)), 4, 12);
+		time = ft_substr(ctime(&(tmp->_stat->st_mtime)), 4, 12);
 		ft_putstr_fd(time, 1);
 		free(time);
 		ft_putstr_fd(" ", 1);
 		ft_putstr_fd(tmp->_info->d_name, 1);
-	
 		i = ft_strlen(tmp->_info->d_name);
 		while (i++ < max_len)
 			ft_putchar_fd(' ', 1);
@@ -259,8 +269,10 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 	}
 	if (max_lens)
 		free(max_lens);
-	while (HAS_FLAG(flags, FLAG_R) && files){
-		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0){
+	while (has_flag(flags, FLAG_R) && files)
+	{
+		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0)
+		{
 			ft_putchar_fd('\n', 1);
 			if (files->_child)
 				write_files_l(files->_child, root, flags);
@@ -279,20 +291,16 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 
 	if (!files)
 		return ;
-	if (HAS_FLAG(flags, FLAG_T))
+	if (has_flag(flags, FLAG_T))
 		files = sort_files_time(files);
 	else
 		files = sort_files_alph(files);
-	if (HAS_FLAG(flags, FLAG_RR))
+	if (has_flag(flags, FLAG_RR))
 		files = sort_files_reverse(files);
 	tmp = files;
 	i = 0;
 	max_len = find_max_lenght(files);
-	/* ft_putstr_fd(files->_info->d_name, 1);
-	ft_putchar_fd(':', 1);
-	if (files->_parent_dir != NULL)
-		ft_putstr_fd(files->_parent_dir->_info->d_name, 1); */
-	if (HAS_FLAG(flags, FLAG_R) && tmp->_parent_dir != NULL)
+	if (has_flag(flags, FLAG_R) && tmp->_parent_dir != NULL)
 		print_parent_path(tmp->_parent_dir, root);
 	while (tmp)
 	{
@@ -303,8 +311,10 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 		tmp = tmp->_next;
 	}
 	ft_putchar_fd('\n', 1);
-	while (HAS_FLAG(flags, FLAG_R) && files){
-		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0){
+	while (has_flag(flags, FLAG_R) && files)
+	{
+		if (files->_info->d_type == DT_DIR && strcmp(files->_info->d_name, ".") != 0 && strcmp(files->_info->d_name, "..") != 0)
+		{
 			ft_putchar_fd('\n', 1);
 			if (files->_child)
 				write_files(files->_child, root, flags);
@@ -315,9 +325,9 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 	}
 }
 
-void	print_err(char *error)
+void	print_err(char	*error)
 {
 	ft_putstr_fd("ft_ls: ", 2);
 	ft_putstr_fd(error, 2);
-	ft_putstr_fd("\n" , 2);
+	ft_putstr_fd("\n", 2);
 }

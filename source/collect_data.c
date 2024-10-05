@@ -1,20 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   collect_data.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/05 20:17:40 by tcelik            #+#    #+#             */
+/*   Updated: 2024/10/05 21:09:13 by tcelik           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/ft_ls.h"
-
-
-
-/*
-Example directory structure:
-	- file0.txt
-	- dir1
-		- file1.txt
-		- file2.txt
-		- subdir1
-			- file3.txt
-	- dir2
-		- file4.txt
-	- file5.txt
-	- file6.txt
-*/
 
 static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags)
 {
@@ -22,23 +18,23 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 	t_file			*tmp;
 	DIR				*dir;
 	struct dirent	*entry;
-	char new_path[PATH_MAX];
-	
-	(void) flags;
+	char			new_path[PATH_MAX];
+
 	dir = opendir(path);
 	files = NULL;
-	while ((entry = readdir(dir)) != NULL) {
-		if (!HAS_FLAG(flags, FLAG_A) && ft_strncmp(entry->d_name, ".", 1) == 0)
-			continue;
+	entry = readdir(dir);
+	while (entry != NULL)
+	{
+		if (!has_flag(flags, FLAG_A) && ft_strncmp(entry->d_name, ".", 1) == 0)
+			continue ;
 		ft_strlcpy(new_path, path, sizeof(new_path));
 		ft_strlcat(new_path, "/", sizeof(new_path));
 		ft_strlcat(new_path, entry->d_name, sizeof(new_path));
-/* 		ft_putstr_fd("New PATH: ", 1);
-		ft_putstr_fd(new_path, 1); */
 		if (files == NULL)
 		{
 			files = ft_file_new();
-			if (!files){
+			if (!files)
+			{
 				closedir(dir);
 				return (1);
 			}
@@ -46,7 +42,8 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 			files->_info = ft_memcpy(files->_info, entry, sizeof(struct dirent));
 			files->_stat = (struct stat *) malloc(sizeof(struct stat));
 			lstat(new_path, files->_stat);
-			if (parent_file){
+			if (parent_file)
+			{
 				parent_file->_child = files;
 				files->_parent_dir = parent_file;
 			}
@@ -54,7 +51,8 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 		else
 		{
 			tmp = ft_file_new();
-			if (!tmp){
+			if (!tmp)
+			{
 				closedir(dir);
 				return (1);
 			}
@@ -68,10 +66,10 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 			if (parent_file)
 				files->_parent_dir = parent_file;
 		}
-		
-		if (HAS_FLAG(flags, FLAG_R) && entry->d_type == DT_DIR)
+		if (has_flag(flags, FLAG_R) && entry->d_type == DT_DIR)
 			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 				collect(NULL, new_path, files, flags);
+		entry = readdir(dir);
 	}
 	if (parent_file == NULL)
 		*_files = files;
@@ -84,31 +82,32 @@ t_list	*collect_data(char **paths, unsigned char flags)
 	int		j;
 	uint8_t	ret;
 	t_list	*p_list;
-	t_list 	*head;
+	t_list	*head;
 
 	j = -1;
 	if (!paths)
 		return (NULL);
-	while(paths[++j])
+	while (paths[++j])
 	{
 		if (j == 0)
 		{
-			p_list = ft_lstnew(ft_file_new());
-            if (!p_list)
-                return (NULL);
-            head = p_list;
+			p_list = ft_lstnew(NULL);
+			if (!p_list)
+				return (NULL);
+			head = p_list;
 		}
-		ret = collect((t_file **) (&(p_list->content)), paths[j], NULL, flags);
+		ret = collect((t_file **)(&(p_list->content)), paths[j], NULL, flags);
 		if (ret == 0)
 		{
 			ft_strlcat(p_list->root, paths[j], PATH_MAX);
 			if (j + 1 != (int) arr_len((const char **)paths))
 			{
 				ft_lstadd_back(&p_list, ft_lstnew(ft_file_new()));
-				printf("p_list2: %p\n", p_list);
 				p_list = p_list->next;
 			}
 		}
+		else
+			return (NULL);
 	}
 	return (head);
 }

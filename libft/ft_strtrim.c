@@ -38,9 +38,9 @@ char	*ft_strtrim(char const *s1, char const *set)
 	i = 0;
 	j = ft_strlen(s1);
 	while (s1[i] && is_in_set(s1[i], set))
-			i++;
+		i++;
 	while (j >= i && is_in_set(s1[j - 1], set))
-			j--;
+		j--;
 	trimmed = (char *)malloc(sizeof(char) * (j - i + 1));
 	if (!trimmed)
 		return (NULL);

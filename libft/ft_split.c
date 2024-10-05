@@ -50,7 +50,7 @@ char	*word_create(char	*s, char c)
 		str[i] = s[i];
 		i++;
 	}
-		str[i] = '\0';
+	str[i] = '\0';
 	return (str);
 }
 

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   check.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/05 20:11:40 by tcelik            #+#    #+#             */
+/*   Updated: 2024/10/05 21:03:43 by tcelik           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/ft_ls.h"
 
 static void	sign_bit(unsigned char *flags, char c)
@@ -12,15 +24,18 @@ static void	sign_bit(unsigned char *flags, char c)
 		*flags = *flags | 0x08;
 	else if (c == 'r')
 		*flags = *flags | 0x10;
-	else {
-		ft_putstr_fd("ft_ls: illegal option -- ", 2);
+	else
+	{
+		ft_putstr_fd("ft_ls: invalid option -- ", 2);
 		ft_putchar_fd(c, 2);
+		ft_putchar_fd('\n', 2);
+		ft_putstr_fd("usage: ft_ls [-artlR] [file ...]", 2);
 		ft_putstr_fd("\n", 2);
 		exit(1);
 	}
 }
 
-unsigned char	check_args(int argc, char **argv) 
+unsigned char	check_args(int argc, char **argv)
 {
 	int				i;
 	int				j;
@@ -29,16 +44,16 @@ unsigned char	check_args(int argc, char **argv)
 	i = -1;
 	flags = 0;
 	(void) argc;
-	while (argv[++i])
+	while (++i < argc - 1)
 	{
-		if (argv[i][0] && argv[i][0] == '-')
+		if (ft_strlen(argv[i]) > 1 && argv[i][0] == '-')
 		{
 			j = 0;
 			while (argv[i][++j])
 				sign_bit(&flags, argv[i][j]);
 		}
 		else
-			break;
+			break ;
 	}
 	return (flags);
 }
@@ -70,7 +85,7 @@ void	print_errors(char **av, int i, int error_count)
 		i++;
 	}
 	errors[error_count] = NULL;
-	stringSort(errors, error_count, 0);
+	string_sort(errors, error_count, 0);
 	i = 0;
 	while (errors[i])
 		print_err(errors[i++]);
@@ -97,7 +112,7 @@ size_t	get_err_count(char **av, int i)
 	return (err_count);
 }
 
-char **path_parser(int ac, char **av, int *err, unsigned char flags)
+char	**path_parser(int ac, char **av, int *err, unsigned char flags)
 {
 	char		**paths;
 	DIR			*dir;
@@ -107,7 +122,7 @@ char **path_parser(int ac, char **av, int *err, unsigned char flags)
 
 	(void) flags;
 	i = 1;
-	while (av[i] && av[i][0] && av[i][0] == '-')
+	while (av[i] && ft_strlen(av[i]) > 1 && av[i][0] == '-')
 		i++;
 	err_count = get_err_count(av, i);
 	print_errors(av, i, err_count);
@@ -116,17 +131,17 @@ char **path_parser(int ac, char **av, int *err, unsigned char flags)
 	if (ac - i == 0)
 	{
 		paths = (char **) malloc(sizeof(char *) * 2);
-        if (!paths)
-            return (NULL);
-        paths[0] = (char *) malloc(sizeof(char) * PATH_MAX);
-        if (!paths[0])
-        {
-            free(paths);
-            return (NULL);
-        }
-        ft_strlcpy(paths[0], ".", PATH_MAX);
-        paths[1] = NULL;
-        return (paths);
+		if (!paths)
+			return (NULL);
+		paths[0] = (char *) malloc(sizeof(char) * PATH_MAX);
+		if (!paths[0])
+		{
+			free(paths);
+			return (NULL);
+		}
+		ft_strlcpy(paths[0], ".", PATH_MAX);
+		paths[1] = NULL;
+		return (paths);
 	}
 	if (ac - i - err_count == 0)
 		return (NULL);
@@ -136,17 +151,17 @@ char **path_parser(int ac, char **av, int *err, unsigned char flags)
 	while (++j < ac - i)
 	{
 		dir = opendir((const char *)av[i + j]);
-		if (dir != NULL){
+		if (dir != NULL)
+		{
 			closedir(dir);
 			paths[err_count] = (char *) malloc(sizeof(char) * PATH_MAX);
 			ft_strlcpy(paths[err_count++], av[i + j], PATH_MAX);
 		}
 	}
 	paths[err_count] = NULL;
-
-	if (HAS_FLAG(flags, FLAG_T))
-		string_sort_time(paths, ac - i - get_err_count(av, i), (uint8_t) HAS_FLAG(flags, FLAG_RR));
+	if (has_flag(flags, FLAG_T))
+		string_sort_time(paths, ac - i - get_err_count(av, i), (uint8_t) has_flag(flags, FLAG_RR));
 	else
-		stringSort(paths, ac - i - get_err_count(av, i), (uint8_t) HAS_FLAG(flags, FLAG_RR));
+		string_sort(paths, ac - i - get_err_count(av, i), (uint8_t) has_flag(flags, FLAG_RR));
 	return (paths);
 }

@@ -1,71 +1,42 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   list.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/05 20:27:56 by tcelik            #+#    #+#             */
+/*   Updated: 2024/10/05 20:28:51 by tcelik           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/ft_ls.h"
-#include <stdio.h>
 
-t_file    *ft_file_new(void)
+t_file	*ft_file_new(void)
 {
-    t_file	*nodes;
+	t_file	*nodes;
 
-    nodes = (t_file *)malloc(sizeof(t_file));
-    printf("address file: %p\n", nodes);
-    if (!nodes)
-        return (NULL);
-    nodes->_type = FT_UNKNOWN;
-    nodes->_child = NULL;
-    nodes->_next = NULL;
-    nodes->_prev = NULL;
-    nodes->_parent_dir = NULL;
-    return (nodes);
+	nodes = (t_file *)malloc(sizeof(t_file));
+	if (!nodes)
+		return (NULL);
+	nodes->_type = FT_UNKNOWN;
+	nodes->_child = NULL;
+	nodes->_next = NULL;
+	nodes->_prev = NULL;
+	nodes->_parent_dir = NULL;
+	return (nodes);
 }
 
-t_file  *get_head_file(t_file *file)
+t_file	*get_head_file(t_file *file)
 {
-    if (!file)
-        return (NULL);
-    while (file->_parent_dir != NULL || file->_prev != NULL)
-    {
-        if (file->_parent_dir != NULL)
-            file = file->_parent_dir;
-        else
-            file = file->_prev;
-    }
-    return (file);
-}
-
-void	ft_file_clear(t_file **lst)
-{
-	t_file	*sup;
-
-	if (!lst)
-		return ;
-	while (*lst)
+	if (!file)
+		return (NULL);
+	while (file->_parent_dir != NULL || file->_prev != NULL)
 	{
-        if ((*lst)->_child)
-            ft_file_clear(&((*lst)->_child));
-		sup = (*lst)->_next;
-		//del((*lst)->content);
-        write(1, "free\n", 5);
-		free(*lst);
-        write(1, "freed\n", 6);
-		*lst = sup;
+		if (file->_parent_dir != NULL)
+			file = file->_parent_dir;
+		else
+			file = file->_prev;
 	}
-	*lst = NULL;
+	return (file);
 }
-
-/* char    **sep_arr(char ***stack, char *needle)
-{
-    size_t  i;
-    size_t  len;
-    char    **ret;
-
-    i = -1;
-    if (!stack || !needle)
-        return NULL;
-    len = arr_len((const char **)(*stack));
-    ret = (char **)malloc(sizeof(char *) * (len + 1));
-    if (!ret)
-        return NULL;
-    while(++i < len)
-        ret[i] = ft_strdup(*stack[i]);
-    ret[i] = NULL;
-    return (ret);
-} */
