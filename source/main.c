@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:29:10 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/05 20:29:41 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/07 01:42:21 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ int	main(int ac, char **av)
 	write_paths(collected_data, paths, _dir_count, flags);
 	ft_clear_all(&collected_data);
 	free_double_pointer(&paths);
+	system("leaks ft_ls");
 	if (collected_data == NULL)
 		return (err);
 	return (err);

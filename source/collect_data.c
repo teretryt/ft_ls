@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:17:40 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/05 21:09:13 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/07 02:09:02 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,16 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 	char			new_path[PATH_MAX];
 
 	dir = opendir(path);
+	if (!dir)
+		return (1);
 	files = NULL;
 	entry = readdir(dir);
 	while (entry != NULL)
 	{
-		if (!has_flag(flags, FLAG_A) && ft_strncmp(entry->d_name, ".", 1) == 0)
+		if (!has_flag(flags, FLAG_A) && ft_strncmp(entry->d_name, ".", 1) == 0){
+			entry = readdir(dir);
 			continue ;
+		}
 		ft_strlcpy(new_path, path, sizeof(new_path));
 		ft_strlcat(new_path, "/", sizeof(new_path));
 		ft_strlcat(new_path, entry->d_name, sizeof(new_path));
@@ -102,7 +106,7 @@ t_list	*collect_data(char **paths, unsigned char flags)
 			ft_strlcat(p_list->root, paths[j], PATH_MAX);
 			if (j + 1 != (int) arr_len((const char **)paths))
 			{
-				ft_lstadd_back(&p_list, ft_lstnew(ft_file_new()));
+				ft_lstadd_back(&p_list, ft_lstnew(NULL));
 				p_list = p_list->next;
 			}
 		}
