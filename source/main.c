@@ -40,7 +40,6 @@ int	main(int ac, char **av)
 	write_paths(collected_data, paths, _dir_count, flags);
 	ft_clear_all(&collected_data);
 	free_double_pointer(&paths);
-	system("leaks ft_ls");
 	if (collected_data == NULL)
 		return (err);
 	return (err);

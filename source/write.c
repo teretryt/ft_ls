@@ -260,10 +260,44 @@ void	write_files_l(t_file *files, char *root, unsigned char flags)
 		ft_putstr_fd(time, 1);
 		free(time);
 		ft_putstr_fd(" ", 1);
-		ft_putstr_fd(tmp->_info->d_name, 1);
-		i = ft_strlen(tmp->_info->d_name);
-		while (i++ < max_len)
-			ft_putchar_fd(' ', 1);
+		if (tmp->_info->d_type != DT_LNK)
+		{
+			ft_putstr_fd(tmp->_info->d_name, 1);
+			i = ft_strlen(tmp->_info->d_name);
+			while (i++ < max_len)
+				ft_putchar_fd(' ', 1);
+		}
+		else {
+			char	path[4096];
+			char	buffer[4096];
+			ssize_t	linkLen;
+			t_file	*tmpp;
+
+			tmpp = tmp;
+			path[0] = 0;
+			buffer[0] = 0;
+			while (tmpp->_parent_dir)
+			{
+				ft_strlcpy(buffer, path, 4096);
+				ft_strlcpy(path, "/", 4096);
+				ft_strlcat(path, tmpp->_info->d_name, 4096);
+				ft_strlcat(path, buffer, 4096);
+				tmpp = tmpp->_parent_dir;
+			}
+			ft_strlcpy(buffer, path, 4096);
+			ft_strlcpy(path, root, 4096);
+			ft_strlcat(path, "/", 4096);
+			ft_strlcat(path, tmpp->_info->d_name, 4096);
+			ft_strlcat(path, buffer, 4096);
+			linkLen = readlink(path, buffer, 4096);
+			if (linkLen == -1)
+				perror("readlink");
+			else
+				buffer[linkLen] = '\0';
+			ft_putstr_fd(tmp->_info->d_name, 1);
+			ft_putstr_fd(" -> ", 1);
+			ft_putstr_fd(buffer, 1);
+		}
 		ft_putchar_fd('\n', 1);
 		tmp = tmp->_next;
 	}
