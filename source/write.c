@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:40:56 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/05 21:03:43 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/07 23:29:43 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,15 @@ static void	write_total(size_t total)
 	ft_putchar_fd('\n', 1);
 }
 
-static void	write_size(off_t size, int max_len)
+static void	write_size(off_t size, size_t max_len)
 {
 	int	tmp;
 	int	max;
 
 	tmp = size;
 	max = 0;
+	if (max_len == 0)
+		max = 1;
 	while (max_len)
 	{
 		max_len /= 10;
