@@ -12,7 +12,7 @@
 
 #include "../includes/ft_ls.h"
 
-int	has_flag(uint8_t x, uint8_t	y)
+int	has_flag(u_int8_t x, u_int8_t	y)
 {
 	return ((x) & (y));
 }

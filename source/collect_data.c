@@ -12,7 +12,7 @@
 
 #include "../includes/ft_ls.h"
 
-static void collect_files_l(t_file *file, const char *path, uint8_t is_last)
+static void collect_files_l(t_file *file, const char *path, u_int8_t is_last)
 {
 	static t_file	*head = NULL;
 	t_file			*files;
@@ -37,7 +37,7 @@ static void collect_files_l(t_file *file, const char *path, uint8_t is_last)
 	}
 }
 
-static uint8_t	collect_write_file(const char *path, unsigned char flags, uint8_t is_last)
+static u_int8_t	collect_write_file(const char *path, unsigned char flags, u_int8_t is_last)
 {
 	t_file	*file;
 
@@ -61,7 +61,7 @@ static uint8_t	collect_write_file(const char *path, unsigned char flags, uint8_t
 }
 
 
-static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags, uint8_t is_last)
+static u_int8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags, u_int8_t is_last)
 {
 	t_file			*files;
 	t_file			*tmp;
@@ -139,7 +139,7 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 t_list	*collect_data(char **paths, unsigned char flags, size_t last_file_idx)
 {
 	int		j;
-	uint8_t	ret;
+	u_int8_t	ret;
 	t_list	*p_list;
 	t_list	*head;
 
@@ -155,7 +155,7 @@ t_list	*collect_data(char **paths, unsigned char flags, size_t last_file_idx)
 				return (NULL);
 			head = p_list;
 		}
-		uint8_t i = ((size_t)j == (last_file_idx & ~((size_t)1 << (sizeof(size_t) * 8 - 1)))) ? 1 : 0;
+		u_int8_t i = ((size_t)j == (last_file_idx & ~((size_t)1 << (sizeof(size_t) * 8 - 1)))) ? 1 : 0;
 		i |= (last_file_idx & ((size_t)1 << (sizeof(size_t) * 8 - 1))) ? 2 : 0;
 		ret = collect((t_file **)(&(p_list->content)), paths[j], NULL, flags, i);
 		if (ret == 0)

@@ -18,11 +18,3 @@ void	ft_putendl_fd(char *s, int fd)
 	if (s)
 		ft_putchar_fd('\n', fd);
 }
-/*
-int	main()
-{
-	char text[] = "test metni";
-	ft_putendl_fd(text, 3);
-	ft_putendl_fd(text, 3);
-}
-*/

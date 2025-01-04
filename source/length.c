@@ -12,27 +12,27 @@
 
 #include "../includes/ft_ls.h"
 
-uint8_t	find_max_lenght(t_file *files)
+u_int8_t	find_max_lenght(t_file *files)
 {
-	uint8_t	i;
+	u_int8_t	i;
 
 	i = 0;
 	while (files)
 	{
-		if (i < (uint8_t) ft_strlen(files->_info->d_name) \
+		if (i < (u_int8_t) ft_strlen(files->_info->d_name) \
 			+ complete_to_eight(files->_info->d_name))
-			i = (uint8_t) ft_strlen(files->_info->d_name) \
+			i = (u_int8_t) ft_strlen(files->_info->d_name) \
 			+ complete_to_eight(files->_info->d_name);
 		files = files->_next;
 	}
 	return (i);
 }
 
-uint8_t	complete_to_eight(const char *name)
+u_int8_t	complete_to_eight(const char *name)
 {
-	uint8_t	len;
+	u_int8_t	len;
 
-	len = (uint8_t) ft_strlen(name);
+	len = (u_int8_t) ft_strlen(name);
 	if (len % 8 == 0)
 		return (8);
 	else

@@ -51,6 +51,8 @@ int	main(int ac, char **av)
 	err = 0;
 	flags = check_args(ac, &av[1]);
 	paths = path_parser(ac, av, &err, flags);
+	if (!paths)
+		return (err);
 	_arg_count = arg_count(ac, av);
 	size_t last_file_idx = get_last_file_idx(paths);
 	collected_data = collect_data(paths, flags, last_file_idx);

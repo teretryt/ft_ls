@@ -72,8 +72,8 @@ static void	write_group(gid_t st_gid, size_t max_len)
 
 static void	write_link_count(nlink_t n, size_t max)
 {
-	uint16_t	tmp;
-	uint8_t		max_len;
+	u_int16_t	tmp;
+	u_int8_t		max_len;
 
 	tmp = n;
 	max_len = 0;
@@ -189,7 +189,7 @@ void	write_paths(t_list *path_list, char **paths, int arg_count, unsigned char f
 			write_files_l(get_head_file(path_list->content), path_list->root, flags);
 		else
 			write_files(get_head_file(path_list->content), path_list->root, flags);
-		if (path_list->next && arr_len((const char **)paths) > 1)
+		if (path_list->next && path_list->next->content && arr_len((const char **)paths) > 1)
 			ft_putchar_fd('\n', 1);
 		path_list = path_list->next;
 	}
@@ -218,7 +218,7 @@ size_t	*get_max_values(t_file *files)
 			ft_putstr_fd("Permission denied.\n", 2);
 			return (NULL);
 		}
-		if (files->_stat->st_nlink > (int)r[0])
+		if (files->_stat->st_nlink > r[0])
 			r[0] = files->_stat->st_nlink;
 		if (ft_strlen(pw->pw_name) > (int) r[1])
 			r[1] = ft_strlen(pw->pw_name);
@@ -232,7 +232,7 @@ size_t	*get_max_values(t_file *files)
 	return (r);
 }
 
-void	_write_files_l(t_file *files, uint8_t is_last)
+void	_write_files_l(t_file *files, u_int8_t is_last)
 {
 	size_t	i;
 	size_t	max_len;
@@ -287,7 +287,7 @@ void	_write_files_l(t_file *files, uint8_t is_last)
 			ft_putchar_fd('\n', 1);
 }
 
-void	_write_files(t_file *file, uint8_t is_last)
+void	_write_files(t_file *file, u_int8_t is_last)
 {
 	size_t	i;
 	size_t	max_len;
@@ -302,8 +302,11 @@ void	_write_files(t_file *file, uint8_t is_last)
 			ft_putchar_fd('\n', 1);
 	}
 	else
+	{
 		while (i++ < max_len)
 			ft_putchar_fd(' ', 1);
+		ft_putchar_fd('\n', 1);
+	}
 	
 }
 
@@ -426,6 +429,8 @@ void	write_files(t_file *files, char *root, unsigned char flags)
 		i = ft_strlen(tmp->_info->d_name);
 		while (i++ < max_len)
 			ft_putchar_fd(' ', 1);
+		if (tmp->_next)
+			ft_putchar_fd('\n', 1);
 		tmp = tmp->_next;
 	}
 	ft_putchar_fd('\n', 1);

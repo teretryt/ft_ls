@@ -50,3 +50,26 @@ char	*ft_strtrim(char const *s1, char const *set)
 	trimmed[x] = '\0';
 	return (trimmed);
 }
+
+char	*ft_strrtrim(char const *s1, char const *set)
+{
+	char	*trimmed;
+	size_t	x;
+	size_t	i;
+	size_t	j;
+
+	if (!s1)
+		return (NULL);
+	i = 0;
+	j = ft_strlen(s1);
+	while (j >= i && is_in_set(s1[j - 1], set))
+		j--;
+	trimmed = (char *)malloc(sizeof(char) * (j - i + 1));
+	if (!trimmed)
+		return (NULL);
+	x = 0;
+	while (i < j)
+		trimmed[x++] = s1[i++];
+	trimmed[x] = '\0';
+	return (trimmed);
+}

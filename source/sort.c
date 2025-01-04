@@ -61,14 +61,14 @@ t_file	*sort_files_time(t_file *head)
 		ptr1 = head;
 		while (ptr1->_next != lptr)
 		{
-			if (ptr1->_stat->st_mtimespec.tv_sec < ptr1->_next->_stat->st_mtimespec.tv_sec)
+			if (ptr1->_stat->st_mtim.tv_sec < ptr1->_next->_stat->st_mtim.tv_sec)
 			{
 				swap(&head, ptr1, ptr1->_next);
 				swapped = 1;
 			}
-			else if (ptr1->_stat->st_mtimespec.tv_sec == ptr1->_next->_stat->st_mtimespec.tv_sec)
+			else if (ptr1->_stat->st_mtim.tv_sec == ptr1->_next->_stat->st_mtim.tv_sec)
 			{
-				if (ptr1->_stat->st_mtimespec.tv_nsec < ptr1->_next->_stat->st_mtimespec.tv_nsec)
+				if (ptr1->_stat->st_mtim.tv_nsec < ptr1->_next->_stat->st_mtim.tv_nsec)
 				{
 					swap(&head, ptr1, ptr1->_next);
 					swapped = 1;
@@ -113,7 +113,7 @@ t_file	*sort_files_alph(t_file *head)
 	return (head);
 }
 
-void	string_sort_time(char **arr, int n, uint8_t reverse)
+void	string_sort_time(char **arr, int n, u_int8_t reverse)
 {
 	int			i;
 	int			j;
@@ -129,17 +129,17 @@ void	string_sort_time(char **arr, int n, uint8_t reverse)
 		{
 			lstat(arr[i], &stat1);
 			lstat(arr[j], &stat2);
-			if ((!reverse && stat1.st_mtimespec.tv_sec < stat2.st_mtimespec.tv_sec) \
-				|| (reverse && stat1.st_mtimespec.tv_sec > stat2.st_mtimespec.tv_sec))
+			if ((!reverse && stat1.st_mtim.tv_sec < stat2.st_mtim.tv_sec) \
+				|| (reverse && stat1.st_mtim.tv_sec > stat2.st_mtim.tv_sec))
 			{
 				ft_strlcpy(temp, arr[i], PATH_MAX);
 				ft_strlcpy(arr[i], arr[j], PATH_MAX);
 				ft_strlcpy(arr[j], temp, PATH_MAX);
 			}
-			else if (stat1.st_mtimespec.tv_sec == stat2.st_mtimespec.tv_sec)
+			else if (stat1.st_mtim.tv_sec == stat2.st_mtim.tv_sec)
 			{
-				if ((!reverse && stat1.st_mtimespec.tv_nsec < stat2.st_mtimespec.tv_nsec) \
-					|| (reverse && stat1.st_mtimespec.tv_nsec > stat2.st_mtimespec.tv_nsec))
+				if ((!reverse && stat1.st_mtim.tv_nsec < stat2.st_mtim.tv_nsec) \
+					|| (reverse && stat1.st_mtim.tv_nsec > stat2.st_mtim.tv_nsec))
 				{
 					ft_strlcpy(temp, arr[i], PATH_MAX);
 					ft_strlcpy(arr[i], arr[j], PATH_MAX);
@@ -150,7 +150,7 @@ void	string_sort_time(char **arr, int n, uint8_t reverse)
 	}
 }
 
-void	string_sort(char **arr, int n, uint8_t reverse)
+void	string_sort(char **arr, int n, u_int8_t reverse)
 {
 	int		i;
 	int		j;

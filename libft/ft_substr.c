@@ -28,12 +28,3 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	ft_strlcpy(ret, s + start, len + 1);
 	return (ret);
 }
-/*
-#include<stdio.h>
-int main()
-{
-	char test[] = "\0";
-	printf("%s\n",ft_substr(test, 5, 0));
-	printf("%s\n", fti_substr(test, 5, 0));
-}
-*/
