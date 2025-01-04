@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:11:40 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/05 21:03:43 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/12 23:37:58 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,18 @@ void	print_errors(char **av, int i, int error_count)
 		dir = opendir((const char *)av[i]);
 		if (dir == NULL)
 		{
-			tmp = ft_strjoin(av[i], ": ");
-			str_err_msg = ft_strdup(strerror(errno));
-			tmp2 = ft_strjoin(tmp, str_err_msg);
-			free(str_err_msg);
-			free(tmp);
-			errors[error_count++] = tmp2;
+			struct stat *buffer;
+			buffer = (struct stat *)malloc(sizeof(struct stat));
+			if (stat((const char *)av[i], buffer) == -1)
+			{
+				tmp = ft_strjoin(av[i], ": ");
+				str_err_msg = ft_strdup(strerror(errno));
+				tmp2 = ft_strjoin(tmp, str_err_msg);
+				free(str_err_msg);
+				free(tmp);
+				errors[error_count++] = tmp2;
+			}
+			free(buffer);
 		}
 		else
 			closedir(dir);
@@ -103,8 +109,13 @@ size_t	get_err_count(char **av, int i)
 	while (av[i])
 	{
 		dir = opendir((const char *)av[i]);
-		if (dir == NULL)
-			err_count++;
+		if (dir == NULL){
+			struct stat *buffer;
+			buffer = (struct stat *)malloc(sizeof(struct stat));
+			if (stat((const char *)av[i], buffer) == -1)
+				err_count++;
+			free(buffer);
+		}
 		else
 			closedir(dir);
 		i++;
@@ -151,12 +162,17 @@ char	**path_parser(int ac, char **av, int *err, unsigned char flags)
 	while (++j < ac - i)
 	{
 		dir = opendir((const char *)av[i + j]);
-		if (dir != NULL)
+		struct stat *buffer;
+		buffer = (struct stat *)malloc(sizeof(struct stat));
+		if (dir == NULL && stat((const char *)av[i + j], buffer) == -1) {}
+		else
 		{
-			closedir(dir);
+			if (dir)
+				closedir(dir);
 			paths[err_count] = (char *) malloc(sizeof(char) * PATH_MAX);
 			ft_strlcpy(paths[err_count++], av[i + j], PATH_MAX);
 		}
+		free(buffer);
 	}
 	paths[err_count] = NULL;
 	if (has_flag(flags, FLAG_T))

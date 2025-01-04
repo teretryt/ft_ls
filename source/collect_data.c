@@ -6,13 +6,62 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:17:40 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/07 02:09:02 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/13 13:56:38 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/ft_ls.h"
 
-static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags)
+static void collect_files_l(t_file *file, const char *path, uint8_t is_last)
+{
+	static t_file	*head = NULL;
+	t_file			*files;
+
+	ft_strlcpy(file->_name, path, sizeof(file->_name));
+	if (head == NULL)
+		head = file;
+	else
+	{
+		files = head;
+		while (files->_next)
+			files = files->_next;
+		files->_next = file;
+	}
+	if (is_last & 1)
+	{
+		_write_files_l(head, is_last);
+		/* while (files)
+		{
+			//FREE FLANA
+		} */
+	}
+}
+
+static uint8_t	collect_write_file(const char *path, unsigned char flags, uint8_t is_last)
+{
+	t_file	*file;
+
+	file = ft_file_new();
+	if (!file)
+		return (1);
+	file->_info = (struct dirent *) malloc(sizeof(struct dirent));
+	if (!file->_info)
+		return (1);
+	ft_strlcpy(file->_info->d_name, path, sizeof(file->_info->d_name));
+	file->_info->d_type = DT_REG;
+	file->_stat = (struct stat *) malloc(sizeof(struct stat));
+	if (!file->_stat)
+		return (1);
+	lstat(path, file->_stat);
+	if (has_flag(flags, FLAG_L))
+		collect_files_l(file, path, is_last);
+	else
+		_write_files(file, is_last);
+	return (0);
+}
+
+
+static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, unsigned char flags, uint8_t is_last)
 {
 	t_file			*files;
 	t_file			*tmp;
@@ -22,7 +71,13 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 
 	dir = opendir(path);
 	if (!dir)
-		return (1);
+	{
+		struct stat	buffer;
+		if (stat(path, &buffer) == -1)
+			return (1);
+		if (buffer.st_mode & S_IFREG)
+			return (collect_write_file(path, flags, is_last));
+	}
 	files = NULL;
 	entry = readdir(dir);
 	while (entry != NULL)
@@ -72,7 +127,7 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 		}
 		if (has_flag(flags, FLAG_R) && entry->d_type == DT_DIR)
 			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-				collect(NULL, new_path, files, flags);
+				collect(NULL, new_path, files, flags, 0);
 		entry = readdir(dir);
 	}
 	if (parent_file == NULL)
@@ -81,7 +136,7 @@ static uint8_t	collect(t_file **_files, const char *path, t_file *parent_file, u
 	return (0);
 }
 
-t_list	*collect_data(char **paths, unsigned char flags)
+t_list	*collect_data(char **paths, unsigned char flags, size_t last_file_idx)
 {
 	int		j;
 	uint8_t	ret;
@@ -100,7 +155,9 @@ t_list	*collect_data(char **paths, unsigned char flags)
 				return (NULL);
 			head = p_list;
 		}
-		ret = collect((t_file **)(&(p_list->content)), paths[j], NULL, flags);
+		uint8_t i = ((size_t)j == (last_file_idx & ~((size_t)1 << (sizeof(size_t) * 8 - 1)))) ? 1 : 0;
+		i |= (last_file_idx & ((size_t)1 << (sizeof(size_t) * 8 - 1))) ? 2 : 0;
+		ret = collect((t_file **)(&(p_list->content)), paths[j], NULL, flags, i);
 		if (ret == 0)
 		{
 			ft_strlcat(p_list->root, paths[j], PATH_MAX);

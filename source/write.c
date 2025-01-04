@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:40:56 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/07 23:29:43 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/13 01:50:19 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,14 +166,21 @@ static void	print_parent_path(t_file *file, char *root)
 	free_double_pointer(&arr);
 }
 
-void	write_paths(t_list *path_list, char **paths, int dir_count, unsigned char flags)
+void	write_paths(t_list *path_list, char **paths, int arg_count, unsigned char flags)
 {
 	size_t	i;
+	DIR		*dir;
 
 	i = 0;
 	while (path_list)
 	{
-		if (dir_count > 1)
+		dir = opendir((const char *)paths[i]);
+		if (dir == NULL){
+			i++;
+			path_list = path_list->next;
+			continue;
+		}
+		if (arg_count > 1)
 		{
 			ft_putstr_fd(paths[i++], 1);
 			ft_putstr_fd(":\n", 1);
@@ -223,6 +230,81 @@ size_t	*get_max_values(t_file *files)
 		files = files->_next;
 	}
 	return (r);
+}
+
+void	_write_files_l(t_file *files, uint8_t is_last)
+{
+	size_t	i;
+	size_t	max_len;
+	size_t	*max_lens;
+	char	*time;
+
+	if (!files)
+		return ;
+	i = 0;
+	max_len = find_max_lenght(files);
+	max_lens = get_max_values(files);
+	if (!max_lens)
+		exit(1);
+	while (files)
+	{
+		write_file_type(files->_stat->st_mode);
+		output_permissions(files->_stat->st_mode);
+		write_link_count(files->_stat->st_nlink, max_lens[0]);
+		write_owner(files->_stat->st_uid, max_lens[1]);
+		write_group(files->_stat->st_gid, max_lens[2]);
+		write_size(files->_stat->st_size, max_lens[3]);
+		time = ft_substr(ctime(&(files->_stat->st_mtime)), 4, 12);
+		ft_putstr_fd(time, 1);
+		free(time);
+		ft_putstr_fd(" ", 1);
+		if (files->_info->d_type != DT_LNK)
+		{
+			ft_putstr_fd(files->_name, 1);
+			i = ft_strlen(files->_name);
+			while (i++ < max_len)
+				ft_putchar_fd(' ', 1);
+		}
+		else {
+			char	buffer[4096];
+			ssize_t	linkLen;
+			linkLen = readlink(files->_name, buffer, 4096);
+			if (linkLen == -1)
+				perror("readlink");
+			else
+				buffer[linkLen] = '\0';
+			ft_putstr_fd(files->_name, 1);
+			ft_putstr_fd(" -> ", 1);
+			ft_putstr_fd(buffer, 1);
+		}
+		ft_putchar_fd('\n', 1);
+		files = files->_next;
+	}
+	if (max_lens)
+		free(max_lens);
+	if (is_last & 1)
+		if (is_last & 2)
+			ft_putchar_fd('\n', 1);
+}
+
+void	_write_files(t_file *file, uint8_t is_last)
+{
+	size_t	i;
+	size_t	max_len;
+
+	max_len = find_max_lenght(file);
+	ft_putstr_fd(file->_info->d_name, 1);
+	i = ft_strlen(file->_info->d_name);
+	if (is_last & 1)
+	{
+		ft_putchar_fd('\n', 1);
+		if (is_last & 2)
+			ft_putchar_fd('\n', 1);
+	}
+	else
+		while (i++ < max_len)
+			ft_putchar_fd(' ', 1);
+	
 }
 
 void	write_files_l(t_file *files, char *root, unsigned char flags)

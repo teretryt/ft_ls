@@ -6,7 +6,7 @@
 /*   By: tcelik <tcelik@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 20:49:39 by tcelik            #+#    #+#             */
-/*   Updated: 2024/10/05 21:04:39 by tcelik           ###   ########.fr       */
+/*   Updated: 2024/10/13 01:34:03 by tcelik           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ typedef struct s_file
 	struct dirent	*_info;
 	struct stat		*_stat;
 	unsigned int	_totalsize;
-	char			_name[256];
+	char			_name[4096];
 	struct s_file	*_child;
 	struct s_file	*_parent_dir;
 	struct s_file	*_next;
@@ -64,7 +64,7 @@ typedef struct s_file
 }	t_file;
 
 unsigned char	check_args(int argc, char **argv);
-t_list			*collect_data(char **paths, unsigned char flags);
+t_list			*collect_data(char **paths, unsigned char flags, size_t last_file_idx);
 void			free_double_pointer(char ***str);
 void			ft_clear_all(t_list **collected_data);
 void			free_file(void **file);
@@ -74,8 +74,9 @@ void			string_sort(char **arr, int n, uint8_t reverse);
 void			string_sort_time(char **arr, int n, uint8_t reverse);
 void			write_files(t_file *files, char *root, unsigned char flags);
 void			write_files_l(t_file *files, char*root, unsigned char flags);
-void			write_paths(t_list *path_list, char **paths, \
-					int dir_count, unsigned char flags);
+void			_write_files(t_file *file, uint8_t is_last);
+void			_write_files_l(t_file *files, uint8_t is_last);
+void			write_paths(t_list *path_list, char **paths, int arg_count, unsigned char flags);
 char			**path_parser(int ac, char **av, int *err, unsigned char flags);
 uint8_t			find_max_lenght(t_file *files);
 uint8_t			complete_to_eight(const char *name);
@@ -86,6 +87,7 @@ size_t			arr_len(const char **arr);
 void			print_err(char *error);
 void			print_errors(char **av, int i, int error_count);
 size_t			get_err_count(char **av, int i);
+size_t			*get_max_values(t_file *files);
 int				has_flag(uint8_t x, uint8_t	y);
 void			ow_rd(mode_t m);
 void			ow_wr(mode_t m);
