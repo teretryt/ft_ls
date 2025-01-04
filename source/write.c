@@ -129,7 +129,10 @@ static void	output_permissions(mode_t m)
 
 static void	print_path_title(size_t j, char **arr, char *root)
 {
-	ft_putstr_fd(root, 1);
+	char *trrim = ft_strrtrim(root, "/");
+	ft_putstr_fd(trrim, 1);
+	free(trrim);
+	
 	ft_putstr_fd("/", 1);
 	while (j > 0)
 	{
@@ -180,7 +183,10 @@ void	write_paths(t_list *path_list, char **paths, int arg_count, unsigned char f
 			path_list = path_list->next;
 			continue;
 		}
-		if (arg_count > 1)
+		else{
+			closedir(dir);
+		}
+		if (arg_count > 1 || has_flag(flags, FLAG_R))
 		{
 			ft_putstr_fd(paths[i++], 1);
 			ft_putstr_fd(":\n", 1);

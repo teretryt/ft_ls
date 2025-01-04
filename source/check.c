@@ -170,10 +170,7 @@ char	**path_parser(int ac, char **av, int *err, unsigned char flags)
 			if (dir)
 				closedir(dir);
 			paths[err_count] = (char *) malloc(sizeof(char) * PATH_MAX);
-			char *trimmed = ft_strrtrim(av[i + j], "/");
-			ft_strlcpy(paths[err_count++], trimmed, PATH_MAX);
-			free(trimmed);
-			free(paths[err_count]);
+			ft_strlcpy(paths[err_count++], av[i + j], PATH_MAX);
 		}
 		free(buffer);
 	}
